@@ -13,12 +13,9 @@ async def create_link(db: AsyncSession, link: schemas.LinkRequest) -> models.Lin
     short_code = gen_short_code()
 
     existing_link = await get_link_by_short_code(db, short_code)
-    if existing_link:
-        if link.custom_code:
-            raise ValueError("Кастомный код уже занят")
-        while existing_link:
-            short_code = gen_short_code()
-            existing_link = await get_link_by_short_code(db, short_code)
+    while existing_link:
+        short_code = gen_short_code()
+        existing_link = await get_link_by_short_code(db, short_code)
 
     db_link = models.Link(
         original_url=link.original_url,
