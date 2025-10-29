@@ -6,8 +6,8 @@
 ## Надо сделать
 
 * Исправить ошибки
-* PostgresQL
-* Docker
+* PostgresQL ☑
+* Docker ☑
 * JWT
 * Документация
 * Мониторинг (Grafana + Prometheus)
