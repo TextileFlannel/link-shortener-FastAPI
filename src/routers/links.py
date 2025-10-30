@@ -1,19 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from src import crud, schemas
+from src import crud, schemas, models
 from src.database import get_db
 from src.schemas import AllLinksResponse
+from src.auth import get_current_user
 
 router = APIRouter()
 
 @router.post('/shorten', response_model=schemas.LinkResponse)
 async def create_short_url(
         link: schemas.LinkRequest,
+        current_user: models.User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
     try:
-        return await crud.create_link(db, link)
+        return await crud.create_link(db, link, current_user.id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -50,11 +52,12 @@ async def get_link_info(
 @router.delete('/link/{short_code}')
 async def delete_link(
         short_code: str,
+        current_user: models.User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
-    deleted = await crud.delete_link_by_short_code(db, short_code)
+    deleted = await crud.delete_link_by_short_code(db, short_code, current_user.id)
     if not deleted:
-        raise HTTPException(status_code=404, detail='not found')
+        raise HTTPException(status_code=404, detail='not found or not authorized')
 
     return {'message': 'link is delete'}
 

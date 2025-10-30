@@ -9,7 +9,7 @@ def gen_short_code(length: int = 6) -> str:
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for _ in range(length))
 
-async def create_link(db: AsyncSession, link: schemas.LinkRequest) -> models.Link:
+async def create_link(db: AsyncSession, link: schemas.LinkRequest, user_id: int) -> models.Link:
     short_code = gen_short_code()
 
     existing_link = await get_link_by_short_code(db, short_code)
@@ -18,8 +18,9 @@ async def create_link(db: AsyncSession, link: schemas.LinkRequest) -> models.Lin
         existing_link = await get_link_by_short_code(db, short_code)
 
     db_link = models.Link(
-        original_url=link.original_url,
-        short_code=short_code
+        original_url=str(link.original_url),
+        short_code=short_code,
+        user_id=user_id
     )
 
     db.add(db_link)
@@ -62,9 +63,9 @@ async def get_all_links(db: AsyncSession):
     )
     return result.scalars().all()
 
-async def delete_link_by_short_code(db: AsyncSession, short_code: str) -> bool:
+async def delete_link_by_short_code(db: AsyncSession, short_code: str, user_id: int) -> bool:
     link = await get_link_by_short_code(db, short_code)
-    if not link:
+    if not link or link.user_id != user_id:
         return False
 
     await db.execute(

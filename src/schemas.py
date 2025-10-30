@@ -1,9 +1,31 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 from datetime import datetime
 from typing import Optional, List
 
+class UserBase(BaseModel):
+    username: str
+    email: str
+
+class UserCreate(UserBase):
+    password: str
+
+class UserResponse(UserBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+
 class LinkBase(BaseModel):
-    original_url: str
+    original_url: HttpUrl
 
 class LinkRequest(LinkBase):
     pass
@@ -13,6 +35,7 @@ class LinkResponse(LinkBase):
     short_code: str
     created_at: datetime
     click_count: int
+    user_id: int
 
     class Config:
         from_attributes = True

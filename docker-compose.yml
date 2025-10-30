@@ -18,6 +18,8 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://user:password@db/link_shortener
+      SECRET_KEY: your-secret-key
+      ALGORITHM: HS256
     depends_on:
       - db
 
